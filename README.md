@@ -1,0 +1,6 @@
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![FAISS](https://img.shields.io/badge/FAISS-Indexing-green)
+![Mistral](https://img.shields.io/badge/Mistral-API-orange)
+![LangChain](https://img.shields.io/badge/LangChain-RAG-blueviolet)
+![OpenAgenda](https://img.shields.io/badge/OpenAgenda-API-success)
+![Status](https://img.shields.io/badge/Build-Passing-brightgreen)
