@@ -1,0 +1,17 @@
+# Python libs
+numpy==2.3.5
+pandas==2.3.3
+requests==2.32.5
+python-dotenv==1.2.1
+
+# Mistral
+mistralai==1.9.11
+
+# LangChain + FAISS
+langchain==1.1.0
+langchain-core==1.1.0
+langchain-community==0.4.1
+faiss-cpu==1.13.0
+
+# Tests
+pytest==9.0.1

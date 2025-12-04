@@ -101,9 +101,26 @@ def main():
     vectorstore.save_local(LC_FAISS_DIR)
     print(f"OK Vector store sauvegardé dans {LC_FAISS_DIR}")
 
-    # 7) Test de recherche (sanity check)
+       # 7) Test de recherche (sanity check avec filtrage sur la ville)
     print("OK Test de recherche : 'concert à Paris' ...")
-    docs = vectorstore.similarity_search("concert à Paris", k=3)
+
+    query = "concert"
+    city_filter = "Paris"
+
+    # On cherche plus large pour ensuite filtrer
+    raw_docs = vectorstore.similarity_search(query, k=20)
+
+    docs_paris = [
+        d for d in raw_docs
+        if d.metadata.get("city", "").lower() == city_filter.lower()
+    ]
+
+    if docs_paris:
+        docs = docs_paris[:3]
+    else:
+        # fallback : si aucun événement à Paris dans le top 20
+        docs = raw_docs[:3]
+        print("⚠ Aucun résultat strictement à Paris, on affiche les meilleurs concerts globaux.")
 
     for i, doc in enumerate(docs):
         meta = doc.metadata
@@ -113,6 +130,7 @@ def main():
         print("Début :", meta.get("first_begin", ""))
         print("Chunk id :", meta.get("chunk_id", ""))
         print("Extrait chunk :", doc.page_content[:200].replace("\n", " "))
+
 
     print("\nOK Étape 3 terminée : index FAISS + métadonnées prêts pour l'étape 4.")
 

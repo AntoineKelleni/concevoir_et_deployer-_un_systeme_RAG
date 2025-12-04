@@ -53,8 +53,8 @@ PREPROCESSED_CSV_PATH = os.path.join(DATA_DIR, "openagenda_events_preprocessed.c
 EMBEDDINGS_PATH = os.path.join(DATA_DIR, "openagenda_events_embeddings.npy")
 
 # Limites de sécurité pour l'API Mistral
-MAX_EVENTS = 80    # on réduit aussi un peu les events avant chunking
-MAX_CHUNKS = 30    # très petit, mais quasi sûr de passer
+MAX_EVENTS = 100    
+MAX_CHUNKS = 200    
 
 
 # ----------------------------------------------------
@@ -184,6 +184,8 @@ def normalize_events(events):
                 title,
                 desc_short,
                 desc_long,
+                f"Ville : {city}" if city else "",
+                f"Lieu : {venue_name}" if venue_name else "",
                 f"Mots clés : {keywords}" if keywords else "",
                 f"Conditions : {conditions}" if conditions else "",
             ]
@@ -325,8 +327,13 @@ def main():
         df["first_begin"], errors="coerce", utc=True
     )
 
-    # Tri du plus récent au plus ancien
-    df = df.sort_values("first_begin_dt", ascending=False).reset_index(drop=True)
+        # On ne garde que les événements à venir (>= maintenant)
+    now_utc = datetime.now(timezone.utc)
+    df = df[df["first_begin_dt"] >= now_utc].reset_index(drop=True)
+    print(f"OK Événements à venir uniquement : {len(df)} lignes")
+
+    # Tri du plus proche au plus lointain
+    df = df.sort_values("first_begin_dt", ascending=True).reset_index(drop=True)
 
     # Vérification des colonnes importantes pour la suite (FAISS)
     required_cols = [
@@ -344,7 +351,7 @@ def main():
 
     # Limiter le nombre d'événements avant chunking (sécurité)
     if len(df) > MAX_EVENTS:
-        print(f"OK Limitation événements : {MAX_EVENTS} sur {len(df)} (les plus récents)")
+        print(f"OK Limitation événements : {MAX_EVENTS} sur {len(df)} (les plus proches à venir)")
         df = df.head(MAX_EVENTS).reset_index(drop=True)
 
     print(f"OK DataFrame retenu pour chunking : {len(df)} événements")
